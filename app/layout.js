@@ -1,0 +1,27 @@
+import "./globals.css";
+import ErrorBoundary from "./components/ErrorBoundary";
+
+export const metadata = {
+  title: "GigCraft — AI-Powered Freelance Proposal Engine",
+  description: "Craft unbeatable, platform-optimized proposals across Upwork, Freelancer, Fiverr, Guru, and PeoplePerHour with AI-driven personalization.",
+};
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body>
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
+      </body>
+    </html>
+  );
+}
