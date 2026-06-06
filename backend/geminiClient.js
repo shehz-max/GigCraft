@@ -1,7 +1,21 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const apiKey = process.env.GEMINI_API_KEY;
-const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+let rawModel = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+
+// Next.js Dev hot-reload env concatenation bug workaround:
+// If the env variable has duplicated itself (e.g. "gemini-2.5-flashgemini-2.5-flash"), extract the base model
+if (rawModel.includes('gemini-2.5-flash')) {
+    rawModel = 'gemini-2.5-flash';
+} else if (rawModel.includes('gemini-2.5-pro')) {
+    rawModel = 'gemini-2.5-pro';
+} else if (rawModel.includes('gemini-1.5-pro')) {
+    rawModel = 'gemini-1.5-pro';
+} else if (rawModel.includes('gemini-1.5-flash')) {
+    rawModel = 'gemini-1.5-flash';
+}
+
+const modelName = rawModel;
 
 let genAI = null;
 if (apiKey) {
