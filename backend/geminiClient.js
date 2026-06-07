@@ -75,9 +75,10 @@ export async function geminiGenerate({ systemPrompt, userPrompt, temperature = 0
     // List of models to try in sequence if we hit high-demand or rate limits
     const modelsToTry = Array.from(new Set([
         modelName,
-        'gemini-1.5-flash', // extremely stable production model
-        'gemini-2.5-flash', // fallback to default name in case modelName was customized
-        'gemini-1.5-pro'    // high capability fallback
+        'gemini-2.0-flash',     // extremely fast and stable Gemini 2.0
+        'gemini-flash-latest',  // stable Gemini 1.5 Flash fallback
+        'gemini-2.5-pro',       // high-tier 2.5 Pro fallback
+        'gemini-pro-latest'     // stable Gemini 1.5 Pro fallback
     ]));
 
     let lastError = null;

@@ -114,10 +114,12 @@ You MUST adjust the text to satisfy the following critique issues:
 ${refinementIssues.map((issue, idx) => `${idx + 1}. ${issue}`).join('\n')}
 
 Guidelines for Refinement:
-1. Preserve the good elements of the previous draft (methods, portfolio metrics, structure).
-2. DO NOT introduce any banned words: "cutting-edge", "game-changing", "tailored solution", "excellence", "leverage", "passionate", "streamline".
-3. Keep the target length for ${platform}: ${platformGuidelines}
-4. You MUST respond with a raw JSON object ONLY, matching this EXACT schema:
+1. Preserve the hook style and any hidden instructions/passwords from the previous draft. If the job posting has a hidden instruction (e.g. starting with a specific word), you MUST preserve it at the very beginning of the letter.
+2. Preserve the good elements of the previous draft (technical methods, custom roadmap, portfolio metrics).
+3. DO NOT introduce any banned words: "cutting-edge", "game-changing", "tailored", "leverage", "excellence", "passionate", "streamline", "delighted", "dive", "tapestry", "moreover", "essentially", "look no further", "testament", "innovative", "seamlessly".
+4. Do NOT use markdown bolding (**text**) or headers (#).
+5. Keep the target length for ${platform}: ${platformGuidelines}
+6. You MUST respond with a raw JSON object ONLY, matching this EXACT schema:
 {
   "coverLetter": "The revised cover letter, incorporating changes to resolve the critique issues while retaining all structural components."
 }
@@ -128,6 +130,11 @@ Output ONLY valid JSON. No explanations, no markdown blocks.`;
 --------------------------------------------------
 ${previousCoverLetter}
 --------------------------------------------------
+
+JOB PARAMETERS:
+Target Platform: ${platform}
+Hidden Instructions: ${parsedJob.hiddenInstructions || 'None'}
+Client Name: ${parsedJob.clientName || 'there'}
 
 CRITIQUE ISSUES TO ADDRESS:
 ${refinementIssues.join(' | ')}`;
@@ -158,13 +165,15 @@ You MUST respond with a raw JSON object ONLY, matching this EXACT schema:
 }
 
 Rules for Generation:
-1. Anti-AI Style: Write like a real, confident human. Alternate sentence lengths. Use contractions (I'll, doesn't, we've). BAN words like "cutting-edge", "game-changing", "tailored solution", "excellence", "leverage", "passionate", "streamline", "delighted".
-2. Follow Hook Strategy: Execute the exact opening hook strategy outlined in the Strategy Brief. No introductory fluff ("My name is...").
-3. Follow Pain-to-Solution Map: Structure the core body of the letter around the pains, business impacts, proposed fixes, and portfolio proofs listed in the Strategy Brief.
-4. Integrate Evidence: Weave in the exact metrics (percentages, hours saved) and tools from the referenced portfolios.
-5. Micro-Value: Seamlessly integrate the free micro-value insight from the Strategy Brief into the letter to build reciprocity.
-6. CTA: Close with a low-friction binary choice CTA (e.g. "Do you have 5 minutes to discuss if we should use brightdata or local proxies for this?").
-7. Screening Answers: If questions are found, answer them. First sentence answers directly, then show STAR methodology proof.
+1. Anti-AI Style: Write like a real, confident, high-tier freelance engineer. Use an active voice. Alternate sentence lengths. Use natural contractions (I'll, doesn't, we've, you'll). STRICTLY BAN these words: "cutting-edge", "game-changing", "tailored", "leverage", "passionate", "streamline", "delighted", "dive", "tapestry", "moreover", "essentially", "look no further", "testament", "innovative", "seamlessly".
+2. No Formatting: Do NOT use markdown bolding (e.g., **text**), bold unicode, or header tags (# H1, ## H2) in the cover letter. Standard platform text views render this poorly, and it flags AI patterns. Use line breaks for paragraphs.
+3. Follow Hook Strategy: Execute the exact opening hook strategy outlined in the Strategy Brief. Start with the technical bottleneck diagnosis immediately. Never start with greetings like "Dear Hiring Manager", "Dear client", or introductions like "My name is...".
+4. Weave Technical Roadmap: Dedicate a section to a brief, highly concrete 3-step roadmap using the "technicalRoadmap" points planned in the Strategy Brief. Make it sound like a specific execution plan.
+5. Follow Pain-to-Solution Map & Integrate Evidence: Structure the core body around the client's pains, business impacts, and proposed fixes. You MUST explicitly mention at least one matched case study or portfolio item by name/description, along with its specific metrics (e.g., "I did a similar database migration to PostgreSQL where we cut latency from 4s to 400ms and stopped transaction crashes"), as proof of your capability.
+6. Quote Pricing/Budget: Mention your pricing in the letter, aligning directly with the "recommendedBid" or standard tier pricing from the Strategy Brief (e.g., "I suggest our standard fixed rate of $4,000 for the migration, profiling, and index tuning..."). Do not low-ball or quote rates below the brief's recommendation.
+7. Micro-Value: Seamlessly integrate the free micro-value suggestion from the Strategy Brief into the body of the letter to build reciprocity.
+8. CTA: Close with a low-friction binary choice CTA (e.g. "Do you have 5 minutes to discuss if we should use brightdata or local proxies for this?").
+9. Screening Answers: If questions are found, answer them. The first sentence must answer the question directly, followed by a brief STAR methodology proof. Do not add fluff.
 
 Platform: ${platform}
 Writing Tone: ${userTone}

@@ -33,7 +33,9 @@ You MUST respond with a raw JSON object ONLY, matching this EXACT schema:
       "businessImpact": "The business consequence (e.g., 'likely losing 10-20% of visitors to bounce, costing ~$X/month in lost revenue')"
     }
   ],
-  "technicalSkills": ["Array of technical skills, libraries, frameworks, or tools required"],
+  "technicalSkills": ["Array of explicit technical skills, libraries, frameworks, or tools required"],
+  "implicitStackAssumptions": ["Array of guessed/assumed stack components or integrations based on context clues (e.g., guessing PostgreSQL, Redis, Stripe, webhooks)"],
+  "diagnosticClues": ["Array of highly specific questions/checks the developer can ask to prove competence (e.g., 'is database indexing configured on checkout table?', 'are webhooks async?')"],
   "toneStyle": "Client's writing style: Formal, Casual, Highly Technical, Urgent, Friendly",
   "hiddenInstructions": "Any hidden instructions, passwords, or check-phrases (e.g. 'start proposal with blue'), or null if none",
   "screeningQuestions": ["Array of explicit screening questions found in the text, or empty array if none"],

@@ -7,7 +7,7 @@ import {
   User, Briefcase, BookOpen, Clock, ChevronRight, Plus,
   BarChart3, Tag, Copy, CheckCircle2, Settings, PenTool, Zap,
   Layout, History, X, AlertTriangle, Eye, RefreshCw,
-  Download, Trash2, Filter
+  Download, Trash2, Filter, Menu
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -33,6 +33,7 @@ export default function Home() {
   const [clientReviews, setClientReviews] = useState('');
   const [userTone, setUserTone] = useState('Conversational');
   const [loading, setLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Mobile sidebar toggle state
 
   const [result, setResult] = useState(null);
   const [parsedJob, setParsedJob] = useState(null);
@@ -477,8 +478,13 @@ export default function Home() {
       }} />
 
       <div className="app-layout">
+        {/* Mobile Sidebar Overlay */}
+        {sidebarOpen && (
+          <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+        )}
+
         {/* SIDEBAR */}
-        <aside className="sidebar">
+        <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
           <div className="sidebar-brand">
             <div className="sidebar-brand-icon"><Zap size={17} /></div>
             <div className="sidebar-brand-text">
@@ -489,36 +495,36 @@ export default function Home() {
 
           <nav className="sidebar-nav">
             <div className="sidebar-section-label">Workspace</div>
-            <button className={`sidebar-nav-item ${activeView === 'generate' ? 'active' : ''}`} onClick={() => setActiveView('generate')}>
+            <button className={`sidebar-nav-item ${activeView === 'generate' ? 'active' : ''}`} onClick={() => { setActiveView('generate'); setSidebarOpen(false); }}>
               <PenTool size={17} className="sidebar-nav-icon" /> Generate
             </button>
-            <button className={`sidebar-nav-item ${activeView === 'history' ? 'active' : ''}`} onClick={() => setActiveView('history')}>
+            <button className={`sidebar-nav-item ${activeView === 'history' ? 'active' : ''}`} onClick={() => { setActiveView('history'); setSidebarOpen(false); }}>
               <History size={17} className="sidebar-nav-icon" /> History
               {history.length > 0 && <span className="sidebar-nav-badge">{history.length}</span>}
             </button>
-            <button className={`sidebar-nav-item ${activeView === 'outreach' ? 'active' : ''}`} onClick={() => setActiveView('outreach')}>
+            <button className={`sidebar-nav-item ${activeView === 'outreach' ? 'active' : ''}`} onClick={() => { setActiveView('outreach'); setSidebarOpen(false); }}>
               <Send size={17} className="sidebar-nav-icon" style={{ transform: 'rotate(-20deg)' }} /> Outreach
             </button>
-            <button className={`sidebar-nav-item ${activeView === 'analytics' ? 'active' : ''}`} onClick={() => setActiveView('analytics')}>
+            <button className={`sidebar-nav-item ${activeView === 'analytics' ? 'active' : ''}`} onClick={() => { setActiveView('analytics'); setSidebarOpen(false); }}>
               <BarChart3 size={17} className="sidebar-nav-icon" /> Analytics
             </button>
 
             <div className="sidebar-section-label" style={{ marginTop: '14px' }}>Settings</div>
-            <button className="sidebar-nav-item" onClick={() => { setProfileModalOpen(true); setModalTab('profile'); }}>
+            <button className="sidebar-nav-item" onClick={() => { setProfileModalOpen(true); setModalTab('profile'); setSidebarOpen(false); }}>
               <User size={17} className="sidebar-nav-icon" /> Profile
             </button>
-            <button className="sidebar-nav-item" onClick={() => { setProfileModalOpen(true); setModalTab('portfolio'); }}>
+            <button className="sidebar-nav-item" onClick={() => { setProfileModalOpen(true); setModalTab('portfolio'); setSidebarOpen(false); }}>
               <Briefcase size={17} className="sidebar-nav-icon" /> Portfolio
               {portfolios.length > 0 && <span className="sidebar-nav-badge">{portfolios.length}</span>}
             </button>
-            <button className="sidebar-nav-item" onClick={() => { setProfileModalOpen(true); setModalTab('case_study'); }}>
+            <button className="sidebar-nav-item" onClick={() => { setProfileModalOpen(true); setModalTab('case_study'); setSidebarOpen(false); }}>
               <BookOpen size={17} className="sidebar-nav-icon" /> Case Studies
               {caseStudies.length > 0 && <span className="sidebar-nav-badge">{caseStudies.length}</span>}
             </button>
           </nav>
 
           <div className="sidebar-footer">
-            <div className="sidebar-profile-card" onClick={() => { setProfileModalOpen(true); setModalTab('profile'); }}>
+            <div className="sidebar-profile-card" onClick={() => { setProfileModalOpen(true); setModalTab('profile'); setSidebarOpen(false); }}>
               <div className="sidebar-avatar">{getInitials(profile.name)}</div>
               <div className="sidebar-profile-info">
                 <div className="sidebar-profile-name">{profile.name || 'Set up profile'}</div>
@@ -533,6 +539,9 @@ export default function Home() {
         <div className="main-content">
           <header className="top-header">
             <div className="header-left">
+              <button className="mobile-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
+                <Menu size={18} />
+              </button>
               <div>
                 <div className="header-page-title">
                   {activeView === 'generate' && 'Proposal Generator'}
@@ -786,6 +795,31 @@ export default function Home() {
                               <div className="insight-label">Required Skills</div>
                               <div className="insight-tags">
                                 {parsedJob.technicalSkills.map((s, i) => <span key={i} className="insight-tag">{s}</span>)}
+                              </div>
+                            </div>
+                          )}
+                          {parsedJob.implicitStackAssumptions?.length > 0 && (
+                            <div className="insight-item" style={{ gridColumn: '1 / -1' }}>
+                              <div className="insight-label">Implicit Stack Assumptions</div>
+                              <div className="insight-tags">
+                                {parsedJob.implicitStackAssumptions.map((s, i) => (
+                                  <span key={i} className="insight-tag" style={{ background: 'var(--accent-100)', color: 'var(--text-secondary)', border: '1px solid var(--border-default)' }}>
+                                    {s}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {parsedJob.diagnosticClues?.length > 0 && (
+                            <div className="insight-item" style={{ gridColumn: '1 / -1' }}>
+                              <div className="insight-label">Key Diagnostic Questions</div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '0.74rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                                {parsedJob.diagnosticClues.map((c, i) => (
+                                  <div key={i} style={{ display: 'flex', gap: '6px', alignItems: 'flex-start' }}>
+                                    <span style={{ color: 'var(--primary-500)', fontWeight: 'bold' }}>?</span>
+                                    <span>{c}</span>
+                                  </div>
+                                ))}
                               </div>
                             </div>
                           )}

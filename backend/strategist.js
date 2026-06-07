@@ -62,6 +62,11 @@ You MUST respond with a raw JSON object ONLY matching this EXACT schema:
       "evidenceToUse": "Title of the specific portfolio item or case study to weave in as proof"
     }
   ],
+  "technicalRoadmap": [
+    "Step 1: Phase name & exact technical action (e.g., Run database index auditing using pg_stat_activity)",
+    "Step 2: Phase name & exact technical action (e.g., Implement Redis cache layering for checkout query response caching)",
+    "Step 3: Phase name & exact technical action (e.g., Set up automated performance load-testing script using k6)"
+  ],
   "differentiators": ["2-3 specific ways our bid will stand out from 50 competing spam proposals (e.g., custom diagnostic checklist, daily status updates dashboard, custom post-launch sandbox)"],
   "toneCalibration": "Instructions on how to write the cover letter using a specific writing tone, matching the client's personality (e.g. mirror their brief style, explain jargon using analogies, use high-octane technical terms)",
   "microValue": "A free quick-win, audit suggestion, or minor optimization recommendation related to their job that we will include to trigger reciprocity (e.g. 'I noticed your page is missing WebP compression; switching images could shave off 1.5s')",
