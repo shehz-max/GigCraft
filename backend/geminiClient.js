@@ -23,7 +23,43 @@ if (apiKey) {
 }
 
 /**
+ * Helper to call model.generateContent with exponential backoff retries on 503/429 errors.
+ */
+async function callWithRetry(modelObj, userPrompt, config, maxRetries = 3) {
+    let delay = 1500; // Start with a 1.5 second delay
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            const result = await modelObj.generateContent({
+                contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+                generationConfig: config,
+            });
+            return result;
+        } catch (err) {
+            const errText = (err.message || '').toLowerCase();
+            const isRetryable = 
+                err.status === 503 || 
+                err.status === 429 || 
+                errText.includes('503') || 
+                errText.includes('429') || 
+                errText.includes('overloaded') ||
+                errText.includes('unavailable') ||
+                errText.includes('high demand') ||
+                errText.includes('limit');
+
+            if (isRetryable && attempt < maxRetries) {
+                console.warn(`[Gemini Client] Attempt ${attempt} failed with retryable error: "${err.message}". Retrying in ${delay}ms...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+                delay *= 2.5; // Exponential backoff factor
+            } else {
+                throw err;
+            }
+        }
+    }
+}
+
+/**
  * Generates content using Google's Gemini API with optional system prompt and JSON schema enforcement.
+ * Automatically handles model fallbacks and retries on transient errors.
  * @param {object} params
  * @param {string} params.systemPrompt - System guidelines and constraints for the model
  * @param {string} params.userPrompt - Input user query or context
@@ -36,43 +72,56 @@ export async function geminiGenerate({ systemPrompt, userPrompt, temperature = 0
         throw new Error('Gemini API Key is not configured in environment variables.');
     }
 
-    try {
-        console.log(`[Gemini Client] Generating content using model: ${modelName}...`);
-        const startTime = Date.now();
+    // List of models to try in sequence if we hit high-demand or rate limits
+    const modelsToTry = Array.from(new Set([
+        modelName,
+        'gemini-1.5-flash', // extremely stable production model
+        'gemini-2.5-flash', // fallback to default name in case modelName was customized
+        'gemini-1.5-pro'    // high capability fallback
+    ]));
 
-        const config = {
-            temperature: temperature,
-        };
+    let lastError = null;
 
-        if (jsonMode) {
-            config.responseMimeType = 'application/json';
-        }
+    for (const currentModelId of modelsToTry) {
+        try {
+            console.log(`[Gemini Client] Attempting generation with model: ${currentModelId}...`);
+            const startTime = Date.now();
 
-        const model = genAI.getGenerativeModel({
-            model: modelName,
-            systemInstruction: systemPrompt,
-        }, { apiVersion: 'v1beta' });
+            const config = {
+                temperature: temperature,
+            };
 
-        const result = await model.generateContent({
-            contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-            generationConfig: config,
-        });
-
-        const textResponse = result.response.text();
-        console.log(`[Gemini Client] Response generated in ${Date.now() - startTime}ms`);
-
-        if (jsonMode) {
-            try {
-                return JSON.parse(textResponse);
-            } catch (jsonErr) {
-                console.error('[Gemini Client] Failed to parse JSON response. Raw text:', textResponse);
-                throw new Error('Gemini model response was not valid JSON: ' + jsonErr.message);
+            if (jsonMode) {
+                config.responseMimeType = 'application/json';
             }
-        }
 
-        return textResponse;
-    } catch (error) {
-        console.error('[Gemini Client] Error generating content:', error);
-        throw error;
+            const modelObj = genAI.getGenerativeModel({
+                model: currentModelId,
+                systemInstruction: systemPrompt,
+            }, { apiVersion: 'v1beta' });
+
+            const result = await callWithRetry(modelObj, userPrompt, config, 3);
+            const textResponse = result.response.text();
+            
+            console.log(`[Gemini Client] Success! Generated using ${currentModelId} in ${Date.now() - startTime}ms`);
+
+            if (jsonMode) {
+                try {
+                    return JSON.parse(textResponse);
+                } catch (jsonErr) {
+                    console.error(`[Gemini Client] Failed to parse JSON response for model ${currentModelId}. Raw text:`, textResponse);
+                    throw new Error('Gemini model response was not valid JSON: ' + jsonErr.message);
+                }
+            }
+
+            return textResponse;
+        } catch (error) {
+            console.error(`[Gemini Client] Model ${currentModelId} failed:`, error.message);
+            lastError = error;
+            // Continue loop to try the next fallback model in the list
+        }
     }
+
+    // If all models failed, throw the last error encountered
+    throw lastError || new Error('All attempted Gemini models failed to generate content.');
 }
